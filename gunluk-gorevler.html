@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Günlük Görevlerim</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fefbe9;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2em;
+      color: #4b5320;
+    }
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px auto;
+      padding: 10px 20px;
+      max-width: 300px;
+      background-color: #fff;
+      border: 2px solid #d4a373;
+      border-radius: 12px;
+    }
+    .task button {
+      background-color: #f4a261;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2em;
+    }
+    .completed {
+      background-color: #2a9d8f !important;
+    }
+    .stars {
+      margin-top: 20px;
+      font-size: 2em;
+      color: #e9c46a;
+    }
+  </style>
+</head>
+<body>
+  <h1>Günlük Görevlerim ⭐</h1>
+  <div id="taskList"></div>
+  <div class="stars" id="starCount">Yıldız: ⭐ 0</div>
+
+  <audio id="successSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_5b88d1164d.mp3"></audio>
+
+  <script>
+    const tasks = [
+      { name: "Yatağını Düzelt 🛏" },
+      { name: "Diş Fırçala (Sabah) 🪥" },
+      { name: "Giyin 👕" },
+      { name: "Kahvaltı Yap 🍽" },
+      { name: "Oyun Zamanı 🎨" },
+      { name: "Öğle Yemeği 🍝" },
+      { name: "Uyku (Öğle) 😴" },
+      { name: "Banyo Yap 🛁" },
+      { name: "Diş Fırçala (Akşam) 🪥" },
+      { name: "Pijama Giy 👚" },
+      { name: "Hikaye Zamanı 📖" },
+      { name: "Uykuya Git 🛌" }
+    ];
+
+    let stars = 0;
+    const taskList = document.getElementById("taskList");
+    const starCount = document.getElementById("starCount");
+    const sound = document.getElementById("successSound");
+
+    tasks.forEach((task, index) => {
+      const div = document.createElement("div");
+      div.className = "task";
+
+      const span = document.createElement("span");
+      span.textContent = task.name;
+
+      const btn = document.createElement("button");
+      btn.textContent = "✓";
+      btn.onclick = () => {
+        if (!btn.classList.contains("completed")) {
+          btn.classList.add("completed");
+          stars++;
+          starCount.textContent = `Yıldız: ⭐ ${stars}`;
+          sound.currentTime = 0;
+          sound.play();
+        }
+      };
+
+      div.appendChild(span);
+      div.appendChild(btn);
+      taskList.appendChild(div);
+    });
+  </script>
+</body>
+</html>
