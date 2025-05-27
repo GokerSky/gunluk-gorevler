@@ -10,6 +10,7 @@
       background-color: #fefbe9;
       padding: 20px;
       text-align: center;
+      overflow: hidden;
     }
     h1 {
       font-size: 2em;
@@ -34,6 +35,7 @@
       width: 40px;
       height: 40px;
       font-size: 1.2em;
+      cursor: pointer;
     }
     .completed {
       background-color: #2a9d8f !important;
@@ -42,6 +44,21 @@
       margin-top: 20px;
       font-size: 2em;
       color: #e9c46a;
+    }
+    .star-pop {
+      position: absolute;
+      font-size: 24px;
+      animation: pop 1s ease-out forwards;
+    }
+    @keyframes pop {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1.5);
+      }
     }
   </style>
 </head>
@@ -73,6 +90,16 @@
     const starCount = document.getElementById("starCount");
     const sound = document.getElementById("successSound");
 
+    function createStarPop(x, y) {
+      const star = document.createElement("div");
+      star.textContent = "⭐";
+      star.className = "star-pop";
+      star.style.left = `${x}px`;
+      star.style.top = `${y}px`;
+      document.body.appendChild(star);
+      setTimeout(() => star.remove(), 1000);
+    }
+
     tasks.forEach((task, index) => {
       const div = document.createElement("div");
       div.className = "task";
@@ -82,14 +109,17 @@
 
       const btn = document.createElement("button");
       btn.textContent = "✓";
-      btn.onclick = () => {
-        if (!btn.classList.contains("completed")) {
-          btn.classList.add("completed");
+      btn.onclick = (e) => {
+        const isCompleted = btn.classList.toggle("completed");
+        if (isCompleted) {
           stars++;
-          starCount.textContent = `Yıldız: ⭐ ${stars}`;
           sound.currentTime = 0;
           sound.play();
+          createStarPop(e.clientX, e.clientY);
+        } else {
+          stars = Math.max(0, stars - 1);
         }
+        starCount.textContent = `Yıldız: ⭐ ${stars}`;
       };
 
       div.appendChild(span);
