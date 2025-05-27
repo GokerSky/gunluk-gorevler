@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Günlük Görevlerim</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fefbe9;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2em;
+      color: #4b5320;
+    }
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px auto;
+      padding: 10px 20px;
+      max-width: 300px;
+      background-color: #fff;
+      border: 2px solid #d4a373;
+      border-radius: 12px;
+    }
+    .task button {
+      background-color: #f4a261;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+    .completed {
+      background-color: #2a9d8f !important;
+    }
+    .stars {
+      margin-top: 20px;
+      font-size: 2em;
+      color: #e9c46a;
+    }
+    .star-pop {
+      position: absolute;
+      font-size: 24px;
+      animation: pop 1s ease-out forwards;
+    }
+    @keyframes pop {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+    }
+    .day-nav {
+      margin: 15px 0;
+    }
+    .day-nav button {
+      margin: 0 10px;
+      padding: 5px 10px;
+      font-size: 1em;
+    }
+  .calendar {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #ffffff;
+  border: 2px solid #d4a373;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.9em;
+  text-align: center;
+}
+.calendar table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.calendar td {
+  padding: 4px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.calendar td.completed {
+  background-color: #2a9d8f;
+  color: white;
+}
+.calendar td.today {
+  border: 2px solid #f4a261;
+}</style>
+</head>
+<body>
+  <h1>Günlük Görevlerim ⭐</h1>
+  <div class="day-nav">
+    <button onclick="changeDay(-1)">◀ Önceki Gün</button>
+    <span id="dateDisplay"></span>
+    <button onclick="changeDay(1)">Sonraki Gün ▶</button>
+  </div>
+  <div id="taskList"></div>
+  <div class="calendar" id="calendar"></div>
+  <div class="stars" id="starCount">Yıldız: ⭐ 0</div>
+
+  <audio id="successSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_5b88d1164d.mp3"></audio>
+
+  <script>
+    const baseTasks = [
+  "🪥 Dişini Fırçala",
+  "🧹 Odanı Topla",
+  "🍳 Kahvaltı Yap",
+  "📱 Tablet Oyna",
+  "🧸 Oyuncak Oyna",
+  "🎨 Resim Yap",
+  "🍽 Akşam Yemeği Ye",
+  "🎲 Oyun Oyna",
+  "📖 Kitap Oku",
+  "🪥 Dişini Fırçala",
+  "🛁 Banyo Yap (2 günde 1)",
+  "🛌 Uyku"
+];
+
+    let stars = 0;
+    let currentDate = new Date();
+    const starCount = document.getElementById("starCount");
+    const dateDisplay = document.getElementById("dateDisplay");
+    const taskList = document.getElementById("taskList");
+    const sound = document.getElementById("successSound");
+    const history = {};
+
+    function formatDate(d) {
+      return d.toISOString().split('T')[0];
+    }
+
+    function shouldShowBanyo(date) {
+      const startDate = new Date("2024-01-01");
+      const dayDiff = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
+      return dayDiff % 2 === 0;
+    }
+
+    function createStarPop(x, y) {
+      const star = document.createElement("div");
+      star.textContent = "⭐";
+      star.className = "star-pop";
+      star.style.left = `${x}px`;
+      star.style.top = `${y}px`;
+      document.body.appendChild(star);
+      setTimeout(() => star.remove(), 1000);
+    }
+
+    function loadTasksForDay(date) {
+      const dateKey = formatDate(date);
+      const showBanyo = shouldShowBanyo(date);
+      let taskNames = [...baseTasks];
+      if (!showBanyo) taskNames = taskNames.filter(name => !name.includes("Banyo Yap"));
+
+      if (!history[dateKey]) history[dateKey] = taskNames.map(() => false);
+      const dayData = history[dateKey];
+
+      taskList.innerHTML = "";
+      stars = 0;
+
+      taskNames.forEach((task, i) => {
+        const div = document.createElement("div");
+        div.className = "task";
+
+        const span = document.createElement("span");
+        span.innerHTML = `<span style='font-size: 1.6em;'>${task}</span>`;
+
+        const btn = document.createElement("button");
+        btn.textContent = "✓";
+        if (dayData[i]) btn.classList.add("completed");
+
+        btn.onclick = (e) => {
+          dayData[i] = !dayData[i];
+          btn.classList.toggle("completed");
+          stars = history[dateKey].filter(v => v).length;
+          starCount.textContent = `Yıldız: ⭐ ${stars}`;
+          if (dayData[i]) {
+            sound.currentTime = 0;
+            sound.play();
+            createStarPop(e.clientX, e.clientY);
+          }
+        };
+
+        div.appendChild(span);
+        div.appendChild(btn);
+        taskList.appendChild(div);
+      });
+
+      starCount.textContent = `Yıldız: ⭐ ${stars}`;
+      dateDisplay.textContent = formatDate(date);
+    }
+
+    function changeDay(offset) {
+  currentDate.setDate(currentDate.getDate() + offset);
+  loadTasksForDay(currentDate);
+  renderCalendar(currentDate);
+}
+
+    loadTasksForDay(currentDate);
+  function renderCalendar(refDate) {
+  const calendarEl = document.getElementById("calendar");
+  const year = refDate.getFullYear();
+  const month = refDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  let html = `<strong>${refDate.toLocaleString('tr-TR', { month: 'long' })} ${year}</strong><table><tr>`;
+
+  const daysOfWeek = ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'];
+  daysOfWeek.forEach(day => html += `<th>${day}</th>`);
+  html += '</tr><tr>';
+
+  for (let i = 0; i < firstDay.getDay(); i++) {
+    html += '<td></td>';
+  }
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const thisDate = new Date(year, month, d);
+    const key = formatDate(thisDate);
+    const isToday = formatDate(thisDate) === formatDate(currentDate);
+    const isComplete = history[key] && history[key].some(v => v);
+    html += `<td class="${isComplete ? 'completed' : ''} ${isToday ? 'today' : ''}" onclick="goToDate('${key}')">${d}</td>`;
+
+    if ((firstDay.getDay() + d) % 7 === 0) html += '</tr><tr>';
+  }
+
+  html += '</tr></table>';
+  calendarEl.innerHTML = html;
+}
+
+function goToDate(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  currentDate = new Date(y, m - 1, d);
+  loadTasksForDay(currentDate);
+  renderCalendar(currentDate);
+}
+</script>
+</body>
+</html>
